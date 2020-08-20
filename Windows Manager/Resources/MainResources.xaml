@@ -1,0 +1,18 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:tb="http://www.hardcodet.net/taskbar"
+                    xmlns:vm="clr-namespace:WindowsManager.ViewModels">
+
+    <vm:ViewModelLocator x:Key="Locator"/>
+
+    <ContextMenu x:Key="TaskbarContextMenu" x:Shared="false">
+        <MenuItem Header="Show screens splitters" />
+    </ContextMenu>
+
+
+    <tb:TaskbarIcon x:Key="TaskbarIcon"
+                    IconSource="/Resources/Icons/Window_Manager_Icon.ico"
+                    DataContext="{Binding Main, Source={StaticResource Locator}}"
+                    ContextMenu="{StaticResource TaskbarContextMenu}"/>
+
+</ResourceDictionary>
