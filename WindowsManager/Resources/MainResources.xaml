@@ -11,7 +11,8 @@
 
 
     <tb:TaskbarIcon x:Key="TaskbarIcon"
-                    IconSource="/Resources/Icons/Window_Manager_Icon.ico"
+                    IconSource="/Resources/Icons/WindowsManager_Icon.ico"
+                    ToolTipText="Windows Manager"
                     DataContext="{Binding Main, Source={StaticResource Locator}}"
                     ContextMenu="{StaticResource TaskbarContextMenu}"/>
 
