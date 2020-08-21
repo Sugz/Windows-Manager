@@ -1,0 +1,98 @@
+﻿<Window x:Class="WindowsManager.Views.SplitWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WindowsManager.Views"
+        xmlns:controls="clr-namespace:WindowsManager.Views.Controls"
+        xmlns:convertors="clr-namespace:WindowsManager.Views.Converters"
+        xmlns:helpers="clr-namespace:WindowsManager.Helpers"
+        xmlns:mahapps="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        Title="SplitWindow"
+        WindowStartupLocation="Manual"
+        Background="#50FFFFFF"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ShowInTaskbar="False"
+        Focusable="True"
+        mc:Ignorable="d">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <convertors:DistanceToGridLengthConverter x:Key="DistanceToGridLength" />
+
+            <Style TargetType="{x:Type GridSplitter}">
+                <Setter Property="Background" Value="Red" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="VerticalAlignment" Value="Stretch" />
+                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            </Style>
+
+            <Style TargetType="{x:Type controls:DistanceIndicator}">
+                <Setter Property="Foreground" Value="#FF00AEFF" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="VerticalAlignment" Value="Stretch" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type controls:DistanceIndicator}">
+                            <Grid HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  Background="Transparent">
+                                <Border x:Name="HorizontalLine"
+                                        Width="{TemplateBinding ActualWidth}"
+                                        Height="2"
+                                        Background="{TemplateBinding Foreground}"
+                                        Visibility="Collapsed" />
+                                <Border x:Name="VerticalLine"
+                                        Width="2"
+                                        Height="{TemplateBinding ActualHeight}"
+                                        Background="{TemplateBinding Foreground}"
+                                        Visibility="Collapsed" />
+                                <mahapps:NumericUpDown x:Name="DistanceInput"
+                                                       BorderBrush="{TemplateBinding Foreground}"
+                                                       BorderThickness="2"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       ChangeValueOnTextChanged="False"
+                                                       FontSize="26"
+                                                       Interval="1"
+                                                       KeyUp="OnDistanceInputKeyUp">
+                                    <mahapps:NumericUpDown.Value>
+                                        <helpers:ConverterBindableParameter Binding="{Binding Distance, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                                            Converter="{StaticResource DistanceToGridLength}"
+                                                                            ConverterParameter="{Binding Position, RelativeSource={RelativeSource TemplatedParent}}" />
+                                    </mahapps:NumericUpDown.Value>
+                                </mahapps:NumericUpDown>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+        </ResourceDictionary>
+
+    </Window.Resources>
+
+    <Grid x:Name="Grid"
+          Background="Transparent">
+        <GridSplitter x:Name="FirstSplitter"
+                      DragDelta="OnSplitterDragDelta" />
+        <GridSplitter x:Name="SecondSplitter"
+                      DragDelta="OnSplitterDragDelta" />
+
+        <controls:DistanceIndicator x:Name="FirstIndicator"
+                                    DistanceChanged="OnIndicatorDistanceChanged" 
+                                    Position="Side"/>
+        <controls:DistanceIndicator x:Name="SecondIndicator"
+                                    DistanceChanged="OnIndicatorDistanceChanged" 
+                                    Position="Center"/>
+        <controls:DistanceIndicator x:Name="ThirdIndicator"
+                                    DistanceChanged="OnIndicatorDistanceChanged" 
+                                    Position="Side"/>
+    </Grid>
+</Window>
