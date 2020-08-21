@@ -3,18 +3,22 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>Windows_Manager</RootNamespace>
+    <RootNamespace>WindowsManager</RootNamespace>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Resources\Icons\WindowsManager_Icon.ico</ApplicationIcon>
+    <Company>Sugz</Company>
+    <Authors>Clement Plantec</Authors>
+    <Copyright>Clement Plantec</Copyright>
+    <Product>Windows Manager</Product>
+    <Version>1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommonServiceLocator" Version="2.0.5" />
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.0.8" />
+    <PackageReference Include="MahApps.Metro" Version="2.2.0" />
     <PackageReference Include="MvvmLightLibs" Version="5.4.1.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Views\" />
   </ItemGroup>
 
   <ItemGroup>
