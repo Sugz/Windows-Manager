@@ -6,7 +6,9 @@
     <vm:ViewModelLocator x:Key="Locator"/>
 
     <ContextMenu x:Key="TaskbarContextMenu" x:Shared="false">
-        <MenuItem Header="Show screens splitters" />
+        <MenuItem Header="Show screens splitters" Command="{Binding ShowSplitWindowsCommand}"/>
+        <Separator />
+        <MenuItem Header="Exit" Command="{Binding ExitAppCommand}"/>
     </ContextMenu>
 
 
