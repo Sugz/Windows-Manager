@@ -8,6 +8,7 @@ using System.Linq;
 using System.Windows;
 using System.Xml.Linq;
 using WindowsManager.Helpers;
+using WindowsManager.Views;
 using Forms = System.Windows.Forms;
 
 namespace WindowsManager.ViewModels
@@ -17,6 +18,7 @@ namespace WindowsManager.ViewModels
 
         #region Fields
 
+        private HotKeysWindow _HotKeysWindow;
         private SettingsManager _SettingsManager;
         private bool _SettingsExist;
         private ForegroundWindowHook _ForegroundWindowHook;
@@ -35,11 +37,21 @@ namespace WindowsManager.ViewModels
         #region Commands
 
         private RelayCommand _ShowSplitWindowsCommand;
+        private RelayCommand _ShowHotKeysWindowsCommand;
         private RelayCommand _ExitAppCommand;
 
         public RelayCommand ShowSplitWindowsCommand => _ShowSplitWindowsCommand ??= new RelayCommand
         (
             () => Screens.ForEach(x => x.ShowSplitters())
+        );
+
+        public RelayCommand ShowHotKeysWindowsCommand => _ShowHotKeysWindowsCommand ??= new RelayCommand
+        (
+            () =>
+            {
+                _HotKeysWindow ??= new HotKeysWindow();
+                _HotKeysWindow.Show();
+            }
         );
 
         public RelayCommand ExitAppCommand => _ExitAppCommand ??= new RelayCommand(() => Application.Current.Shutdown());

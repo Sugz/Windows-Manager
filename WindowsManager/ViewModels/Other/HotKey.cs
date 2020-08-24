@@ -1,6 +1,7 @@
 ﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Windows.Input;
 
 namespace WindowsManager.ViewModels
@@ -41,16 +42,49 @@ namespace WindowsManager.ViewModels
         public ModifierKeys Modifiers
         {
             get => _Modifiers;
-            set => Set(ref _Modifiers, value);
+            set
+            {
+                Set(ref _Modifiers, value);
+                RaisePropertyChanged(nameof(Keys));
+            }
         }
 
         public Key Key
         {
             get => _Key;
-            set => Set(ref _Key, value);
+            set
+            {
+                Set(ref _Key, value);
+                RaisePropertyChanged(nameof(Keys));
+            }
         }
 
 
+        public string Keys
+        {
+            get
+            {
+                List<string> modifiers = new List<string>();
+                //foreach (ModifierKeys modifier in Enum.GetValues(typeof(ModifierKeys)))
+                //    if ((Modifiers & modifier) != 0) 
+                //        modifiers.Add(modifier.ToString());
+
+                if ((Modifiers & ModifierKeys.Control) != 0)
+                    modifiers.Add(ModifierKeys.Control.ToString());
+                if ((Modifiers & ModifierKeys.Shift) != 0)
+                    modifiers.Add(ModifierKeys.Shift.ToString());
+                if ((Modifiers & ModifierKeys.Alt) != 0)
+                    modifiers.Add(ModifierKeys.Alt.ToString());
+                if ((Modifiers & ModifierKeys.Windows) != 0)
+                    modifiers.Add(ModifierKeys.Windows.ToString());
+
+                string keys = "";
+                modifiers.ForEach(x => keys += $"{x} + ");
+                keys += Key.ToString();
+
+                return keys;
+            }
+        }
 
 
 
