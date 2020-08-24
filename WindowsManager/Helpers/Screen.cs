@@ -19,8 +19,6 @@ namespace WindowsManager.Helpers
 
         private Forms.Screen _Screen;
 
-        private readonly Orientation _Orientation;
-
         private SplitWindow _SplitWindow = null;
 
         #endregion Fields
@@ -33,6 +31,8 @@ namespace WindowsManager.Helpers
         public int Index { get; private set; }
 
         public Rect[] Rects { get; private set; } = new Rect[3];
+
+        public Orientation Orientation { get; set; }
 
         #endregion Properties
 
@@ -51,11 +51,11 @@ namespace WindowsManager.Helpers
             _Screen = screen;
             Index = index;
             WorkingArea = new Rect(_Screen.WorkingArea.X, _Screen.WorkingArea.Y, _Screen.WorkingArea.Width, _Screen.WorkingArea.Height);
-            _Orientation = WorkingArea.Width >= WorkingArea.Height ? Orientation.Horizontal : Orientation.Vertical;
+            Orientation = WorkingArea.Width >= WorkingArea.Height ? Orientation.Horizontal : Orientation.Vertical;
 
             if (!settingsExist)
             {
-                switch (_Orientation)
+                switch (Orientation)
                 {
                     case Orientation.Horizontal:
                         double width = WorkingArea.Width / 3;
@@ -105,7 +105,7 @@ namespace WindowsManager.Helpers
                     Top = WorkingArea.Y,
                     Width = WorkingArea.Width,
                     Height = WorkingArea.Height,
-                    Orientation = _Orientation,
+                    Orientation = Orientation,
                     Rects = Rects
                 };
 
