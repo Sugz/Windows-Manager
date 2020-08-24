@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using CommonServiceLocator;
+﻿using CommonServiceLocator;
 using GalaSoft.MvvmLight.Ioc;
 using WindowsManager.Helpers;
 
@@ -18,5 +15,11 @@ namespace WindowsManager.ViewModels
         }
 
         public MainViewModel Main => ServiceLocator.Current.GetInstance<MainViewModel>();
+
+
+        public static void Cleanup()
+        {
+            ServiceLocator.Current.GetInstance<MainViewModel>().Cleanup();
+        }
     }
 }
