@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows;
 
 namespace WindowsManager.Helpers
 {
@@ -46,6 +47,26 @@ namespace WindowsManager.Helpers
             SynchronousWindowPosition = 0x4000,
         }
 
+        [Flags]
+        public enum DwmWindowAttribute : uint
+        {
+            NCRenderingEnabled = 1,
+            NCRenderingPolicy,
+            TransitionsForceDisabled,
+            AllowNCPaint,
+            CaptionButtonBounds,
+            NonClientRtlLayout,
+            ForceIconicRepresentation,
+            Flip3DPolicy,
+            ExtendedFrameBounds,
+            HasIconicBitmap,
+            DisallowPeek,
+            ExcludedFromPeek,
+            Cloak,
+            Cloaked,
+            FreezeRepresentation
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         internal struct RECT
         {
@@ -53,6 +74,15 @@ namespace WindowsManager.Helpers
             public int Top;         // y position of upper-left corner
             public int Right;       // x position of lower-right corner
             public int Bottom;      // y position of lower-right corner
+
+            public Rect ToRect()
+            {
+                return new Rect(
+                    Left,
+                    Top,
+                    Right - Left,
+                    Bottom - Top);
+            }
         }
 
         internal delegate void WinEventDelegate(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime);
@@ -90,6 +120,9 @@ namespace WindowsManager.Helpers
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+        [DllImport("dwmapi.dll")]
+        internal static extern int DwmGetWindowAttribute(IntPtr hwnd, DwmWindowAttribute dwAttribute, out RECT pvAttribute, int cbAttribute);
 
         #endregion Window Interop
     }
