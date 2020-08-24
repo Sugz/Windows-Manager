@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Markup;
 
 namespace WindowsManager.Helpers
 {
@@ -28,13 +29,13 @@ namespace WindowsManager.Helpers
             return Array.IndexOf(areas, areas.Max());
         }
 
-        internal static Rect ToRect(this NativeMethods.RECT rect)
+
+        internal static Rect SetTopLeft(this Rect rect, Point point)
         {
-            return new Rect(
-                rect.Left,
-                rect.Top,
-                rect.Right - rect.Left,
-                rect.Bottom - rect.Top);
+            rect.X = point.X;
+            rect.Y = point.Y;
+            return rect;
         }
+
     }
 }
