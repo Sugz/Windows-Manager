@@ -3,6 +3,7 @@ using GalaSoft.MvvmLight.CommandWpf;
 using GalaSoft.MvvmLight.Ioc;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Xml.Linq;
@@ -17,7 +18,9 @@ namespace WindowsManager.ViewModels
         #region Fields
 
         private SettingsManager _SettingsManager;
-        private bool _SettingsExist; 
+        private bool _SettingsExist;
+        private ForegroundWindowHook _ForegroundWindowHook;
+        private IntPtr _CurrentForegroundWindow = IntPtr.Zero;
 
         #endregion Fields
 
@@ -50,7 +53,9 @@ namespace WindowsManager.ViewModels
         {
             CheckSettings();
             GetScreens();
+            SetForegroundWindowHook();
             InitializeHotKeysHost();
+            CreateHotKeys();
         }
 
         #endregion Constructor
@@ -100,6 +105,17 @@ namespace WindowsManager.ViewModels
                 LoadSettings();
         }
 
+
+        private void SetForegroundWindowHook()
+        {
+            _ForegroundWindowHook = new ForegroundWindowHook();
+            _ForegroundWindowHook.ForegroundWindowChanged += OnForegroundWindowChanged;
+            _ForegroundWindowHook.Start();
+            _CurrentForegroundWindow = NativeMethods.GetForegroundWindow();
+        }
+
+        
+
         #endregion Initialisation
 
 
@@ -120,6 +136,11 @@ namespace WindowsManager.ViewModels
             _SettingsManager.Save(serializedScreens);
         }
 
+        private void OnForegroundWindowChanged(object sender, ForegroundWindowChangedEventArgs e)
+        {
+            _CurrentForegroundWindow = e.Handle;
+        }
+
         #endregion Event Handlers
 
 
@@ -127,6 +148,8 @@ namespace WindowsManager.ViewModels
 
         public override void Cleanup()
         {
+            _ForegroundWindowHook.ForegroundWindowChanged -= OnForegroundWindowChanged;
+            _ForegroundWindowHook.Stop();
             CleanupHotKeysHost();
             base.Cleanup();
         }

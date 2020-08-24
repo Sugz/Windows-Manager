@@ -70,6 +70,9 @@ namespace WindowsManager.Helpers
         [DllImport("user32.dll")]
         internal static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax, IntPtr hmodWinEventProc, WinEventDelegate lpfnWinEventProc, uint idProcess, uint idThread, uint dwFlags);
 
+        [DllImport("user32.dll", SetLastError = true)]
+        internal static extern int UnhookWinEvent(IntPtr hWinEventHook);
+
         [DllImport("user32.dll")]
         internal static extern IntPtr GetForegroundWindow();
 
