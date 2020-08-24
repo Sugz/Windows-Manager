@@ -17,6 +17,9 @@ namespace WindowsManager.ViewModels
 {
     public partial class MainViewModel : ViewModelBase
     {
+
+        #region Structs and Enums
+
         private struct ContainingRects
         {
             public bool IsNull;
@@ -31,7 +34,7 @@ namespace WindowsManager.ViewModels
             }
 
             public static ContainingRects Null => new ContainingRects { IsNull = true, Screen = -1, Rect = -1 };
-            
+
         }
 
         private struct WindowRect
@@ -58,11 +61,49 @@ namespace WindowsManager.ViewModels
             }
         }
 
+        private enum Side
+        {
+            Left,
+            Up,
+            Right,
+            Down
+        }
+
+        #endregion Structs and Enums
 
 
-        public int MoveStep { get; set; } = 5;
-        public int ResizeStep { get; set; } = 5;
+        #region Fields
 
+        private int _MoveStep = 25;
+        private int _ResizeStep = 25;
+        private Helpers.Size _ExplorerSize = new Helpers.Size(1400, 800);
+
+        #endregion Fields
+
+
+        #region Properties
+
+        public int MoveStep
+        {
+            get => _MoveStep;
+            set => Set(ref _MoveStep, value);
+        }
+        public int ResizeStep
+        {
+            get => _ResizeStep;
+            set => Set(ref _ResizeStep, value);
+        }
+
+        public Helpers.Size ExplorerSize
+        {
+            get => _ExplorerSize;
+            set => Set(ref _ExplorerSize, value);
+        }
+
+        #endregion Properties
+
+
+        #region HotKeys
 
         private void CreateHotKeys()
         {
@@ -149,6 +190,138 @@ namespace WindowsManager.ViewModels
 
             #endregion Extend to area
 
+            #region Move
+
+            AddHotKey(new HotKey(
+                _IdGen.Next(),
+                $"Move Window Left",
+                () => MoveWindow(Side.Left),
+                () => _CurrentForegroundWindow != IntPtr.Zero,
+                Key.Left,
+                ModifierKeys.Control,
+                $"Move left the current window"
+                ));
+
+            AddHotKey(new HotKey(
+                _IdGen.Next(),
+                $"Move Window Up",
+                () => MoveWindow(Side.Up),
+                () => _CurrentForegroundWindow != IntPtr.Zero,
+                Key.Up,
+                ModifierKeys.Control,
+                $"Move up the current window"
+                ));
+
+            AddHotKey(new HotKey(
+                _IdGen.Next(),
+                $"Move Window Right",
+                () => MoveWindow(Side.Right),
+                () => _CurrentForegroundWindow != IntPtr.Zero,
+                Key.Right,
+                ModifierKeys.Control,
+                $"Move right the current window"
+                ));
+
+            AddHotKey(new HotKey(
+                _IdGen.Next(),
+                $"Move Window Down",
+                () => MoveWindow(Side.Down),
+                () => _CurrentForegroundWindow != IntPtr.Zero,
+                Key.Down,
+                ModifierKeys.Control,
+                $"Move down the current window"
+                ));
+
+            #endregion Move
+
+            #region Positive Resize
+
+            AddHotKey(new HotKey(
+                _IdGen.Next(),
+                $"Positive Resize Window Left",
+                () => ResizeWindow(Side.Left, 1),
+                () => _CurrentForegroundWindow != IntPtr.Zero,
+                Key.Left,
+                ModifierKeys.Control | ModifierKeys.Shift,
+                $"Positive Resize left the current window"
+                ));
+
+            AddHotKey(new HotKey(
+                _IdGen.Next(),
+                $"Positive Resize Window Up",
+                () => ResizeWindow(Side.Up, 1),
+                () => _CurrentForegroundWindow != IntPtr.Zero,
+                Key.Up,
+                ModifierKeys.Control | ModifierKeys.Shift,
+                $"Positive Resize up the current window"
+                ));
+
+            AddHotKey(new HotKey(
+                _IdGen.Next(),
+                $"Positive Resize Window Right",
+                () => ResizeWindow(Side.Right, 1),
+                () => _CurrentForegroundWindow != IntPtr.Zero,
+                Key.Right,
+                ModifierKeys.Control | ModifierKeys.Shift,
+                $"Positive Resize right the current window"
+                ));
+
+            AddHotKey(new HotKey(
+                _IdGen.Next(),
+                $"Positive Resize Window Down",
+                () => ResizeWindow(Side.Down, 1),
+                () => _CurrentForegroundWindow != IntPtr.Zero,
+                Key.Down,
+                ModifierKeys.Control | ModifierKeys.Shift,
+                $"Positive Resize down the current window"
+                ));
+
+            #endregion Positive Resize
+
+            #region Negative Resize
+
+            AddHotKey(new HotKey(
+                _IdGen.Next(),
+                $"Positive Resize Window Left",
+                () => ResizeWindow(Side.Left, -1),
+                () => _CurrentForegroundWindow != IntPtr.Zero,
+                Key.Left,
+                ModifierKeys.Control | ModifierKeys.Alt,
+                $"Positive Resize left the current window"
+                ));
+
+            AddHotKey(new HotKey(
+                _IdGen.Next(),
+                $"Positive Resize Window Up",
+                () => ResizeWindow(Side.Up, -1),
+                () => _CurrentForegroundWindow != IntPtr.Zero,
+                Key.Up,
+                ModifierKeys.Control | ModifierKeys.Alt,
+                $"Positive Resize up the current window"
+                ));
+
+            AddHotKey(new HotKey(
+                _IdGen.Next(),
+                $"Positive Resize Window Right",
+                () => ResizeWindow(Side.Right, -1),
+                () => _CurrentForegroundWindow != IntPtr.Zero,
+                Key.Right,
+                ModifierKeys.Control | ModifierKeys.Alt,
+                $"Positive Resize right the current window"
+                ));
+
+            AddHotKey(new HotKey(
+                _IdGen.Next(),
+                $"Positive Resize Window Down",
+                () => ResizeWindow(Side.Down, -1),
+                () => _CurrentForegroundWindow != IntPtr.Zero,
+                Key.Down,
+                ModifierKeys.Control | ModifierKeys.Alt,
+                $"Positive Resize down the current window"
+                ));
+
+            #endregion Negative Resize
+
             #region Explorer
 
             AddHotKey(new HotKey(
@@ -161,13 +334,15 @@ namespace WindowsManager.ViewModels
                 ));
 
             #endregion Explorer
-            
+
         }
 
+        #endregion HotKeys
 
 
+        #region Methods and Handlers
 
-        private WindowRect GetWindowBorders()
+        private WindowRect GetWindowSize()
         {
             NativeMethods.GetWindowRect(_CurrentForegroundWindow, out NativeMethods.RECT windowRect);
 
@@ -182,8 +357,6 @@ namespace WindowsManager.ViewModels
             borders.Top = frame.Top - windowRect.Top;
             borders.Right = windowRect.Right - frame.Right;
             borders.Bottom = windowRect.Bottom - frame.Bottom;
-
-
 
             return new WindowRect(windowRect.ToRect(), borders);
         }
@@ -239,14 +412,14 @@ namespace WindowsManager.ViewModels
 
         private void SwitchToScreen(int index)
         {
-            WindowRect windowRect = GetWindowBorders();
+            WindowRect windowRect = GetWindowSize();
             SetWindowInScreenArea(windowRect.Borders, index);
         }
 
 
         private void SwitchToArea(int index = 0)
         {
-            WindowRect windowRect = GetWindowBorders();
+            WindowRect windowRect = GetWindowSize();
             ContainingRects indexes = GetContainingRects(windowRect.Rect);
             if (!indexes.IsNull)
                 SetWindowInScreenArea(windowRect.Borders, indexes.Screen, indexes.Rect + index);
@@ -255,7 +428,7 @@ namespace WindowsManager.ViewModels
 
         private void ExtendToArea(int index)
         {
-            WindowRect windowRect = GetWindowBorders();
+            WindowRect windowRect = GetWindowSize();
             ContainingRects indexes = GetContainingRects(windowRect.Rect);
             if (indexes.IsNull)
                 return;
@@ -275,7 +448,7 @@ namespace WindowsManager.ViewModels
             NativeMethods.RECT borders = windowRect.Borders;
 
             rect = rect.SetTopLeft(index == -1 ? targetRect.TopLeft : currentRect.TopLeft);
-            switch(screen.Orientation)
+            switch (screen.Orientation)
             {
                 case Orientation.Horizontal:
                     rect.Width = currentRect.Width + targetRect.Width;
@@ -294,6 +467,69 @@ namespace WindowsManager.ViewModels
                 (int)(workingArea.Y + rect.Y - borders.Top),
                 (int)(rect.Width + borders.Left + borders.Right),
                 (int)(rect.Height + borders.Top + borders.Bottom),
+                Convert.ToUInt32(NativeMethods.SetWindowPosFlags.IgnoreZOrder | NativeMethods.SetWindowPosFlags.ShowWindow));
+        }
+
+
+        private void MoveWindow(Side side)
+        {
+            NativeMethods.GetWindowRect(_CurrentForegroundWindow, out NativeMethods.RECT windowRect);
+            Rect rect = windowRect.ToRect();
+            switch (side)
+            {
+                case Side.Left:
+                    rect.X -= _MoveStep;
+                    break;
+                case Side.Up:
+                    rect.Y -= _MoveStep;
+                    break;
+                case Side.Right:
+                    rect.X += _MoveStep;
+                    break;
+                case Side.Down:
+                    rect.Y += _MoveStep;
+                    break;
+            }
+
+            NativeMethods.SetWindowPos(
+                _CurrentForegroundWindow,
+                IntPtr.Zero,
+                (int)rect.X,
+                (int)rect.Y,
+                0,
+                0,
+                Convert.ToUInt32(NativeMethods.SetWindowPosFlags.IgnoreZOrder | NativeMethods.SetWindowPosFlags.ShowWindow | NativeMethods.SetWindowPosFlags.IgnoreResize));
+        }
+
+
+        private void ResizeWindow(Side side, int multiplier)
+        {
+            NativeMethods.GetWindowRect(_CurrentForegroundWindow, out NativeMethods.RECT windowRect);
+            Rect rect = windowRect.ToRect();
+
+            switch (side)
+            {
+                case Side.Left:
+                    rect.X -= _ResizeStep * multiplier;
+                    goto case Side.Right;
+                case Side.Right:
+                    rect.Width += _ResizeStep * multiplier;
+                    break;
+                case Side.Up:
+                    rect.Y -= _ResizeStep * multiplier;
+                    goto case Side.Down;
+                case Side.Down:
+                    rect.Height += _ResizeStep * multiplier;
+                    break;
+            }
+
+            NativeMethods.SetWindowPos(
+                _CurrentForegroundWindow,
+                IntPtr.Zero,
+                (int)rect.X,
+                (int)rect.Y,
+                (int)rect.Width,
+                (int)rect.Height,
                 Convert.ToUInt32(NativeMethods.SetWindowPosFlags.IgnoreZOrder | NativeMethods.SetWindowPosFlags.ShowWindow));
         }
 
@@ -321,7 +557,7 @@ namespace WindowsManager.ViewModels
                 if (filename.Equals("explorer"))
                 {
                     IntPtr explorerHwnd = new IntPtr(ie.HWND);
-                    SetWindowInFront(explorerHwnd);
+                    SetWindowInFront(explorerHwnd, ExplorerSize);
                     return;
                 }
             }
@@ -330,22 +566,46 @@ namespace WindowsManager.ViewModels
         }
 
 
-        private void SetWindowInFront(IntPtr hwnd)
+        private void SetWindowInFront(IntPtr hwnd, Helpers.Size size)
         {
             //get the window size, then move it to the center of the first screen
             if (!NativeMethods.GetWindowRect(hwnd, out NativeMethods.RECT rct))
                 return;
 
-            int wndWidth = rct.Right - rct.Left;
-            int wndHeight = rct.Bottom - rct.Top;
+            Rect rect = rct.ToRect();
+            int left, top;
 
-            int left = (int)(Screens[0].WorkingArea.X + (Screens[0].WorkingArea.Width / 2) - (wndWidth / 2));
-            int top = (int)(Screens[0].WorkingArea.Y + (Screens[0].WorkingArea.Height / 2) - (wndHeight / 2));
+            NativeMethods.SetWindowPosFlags flags = NativeMethods.SetWindowPosFlags.IgnoreZOrder | NativeMethods.SetWindowPosFlags.ShowWindow;
+            if (size.IsNull)
+            {
+                flags |= NativeMethods.SetWindowPosFlags.IgnoreResize;
+                left = (int)((Screens[0].WorkingArea.Width / 2) - (rect.Width / 2));
+                top = (int)((Screens[0].WorkingArea.Height / 2) - (rect.Height / 2));
+            }
+            else
+            {
+                left = (int)((Screens[0].WorkingArea.Width / 2) - (size.Width / 2));
+                top = (int)((Screens[0].WorkingArea.Height / 2) - (size.Height / 2));
+            }
 
-            NativeMethods.SetWindowPos(hwnd, NativeMethods.HWND_TOPMOST, left, top, 0, 0,
-                    Convert.ToUInt32(NativeMethods.SetWindowPosFlags.IgnoreZOrder | NativeMethods.SetWindowPosFlags.IgnoreResize | NativeMethods.SetWindowPosFlags.ShowWindow));
+
+            NativeMethods.ShowWindow(hwnd, NativeMethods.WindowShowStyle.Restore);
+
+            NativeMethods.SetWindowPos(
+                hwnd,
+                NativeMethods.HWND_TOPMOST,
+                left,
+                top,
+                size.Width,
+                size.Height,
+                Convert.ToUInt32(flags));
 
             NativeMethods.SetForegroundWindow(hwnd);
-        }
+        } 
+
+        #endregion Methods and Handlers
     }
 }
+
+
+//TODO: save properties in settings
