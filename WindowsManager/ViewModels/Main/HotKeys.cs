@@ -75,6 +75,7 @@ namespace WindowsManager.ViewModels
             {
                 int index = screen.Index;
                 AddHotKey(new HotKey(
+                    _IdGen.Next(),
                     $"Switch to {numbers[index]} monitor",
                     () => SwitchToScreen(index),
                     () => _CurrentForegroundWindow != IntPtr.Zero,
@@ -89,6 +90,7 @@ namespace WindowsManager.ViewModels
             #region Maximize
 
             AddHotKey(new HotKey(
+                _IdGen.Next(),
                 "Maximize Window",
                 () => SwitchToArea(),
                 () => _CurrentForegroundWindow != IntPtr.Zero,
@@ -102,6 +104,7 @@ namespace WindowsManager.ViewModels
             #region Switch areas
 
             AddHotKey(new HotKey(
+                _IdGen.Next(),
                 "Switch to Previous Area",
                 () => SwitchToArea(-1),
                 () => _CurrentForegroundWindow != IntPtr.Zero,
@@ -111,6 +114,7 @@ namespace WindowsManager.ViewModels
                 ));
 
             AddHotKey(new HotKey(
+                _IdGen.Next(),
                 "Switch to Next Area",
                 () => SwitchToArea(1),
                 () => _CurrentForegroundWindow != IntPtr.Zero,
@@ -124,6 +128,7 @@ namespace WindowsManager.ViewModels
             #region Extend to area
 
             AddHotKey(new HotKey(
+                _IdGen.Next(),
                 $"Extend Window to previous area",
                 () => ExtendToArea(-1),
                 () => _CurrentForegroundWindow != IntPtr.Zero,
@@ -133,6 +138,7 @@ namespace WindowsManager.ViewModels
                 ));
 
             AddHotKey(new HotKey(
+                _IdGen.Next(),
                 $"Extend Window to next area",
                 () => ExtendToArea(1),
                 () => _CurrentForegroundWindow != IntPtr.Zero,
@@ -146,6 +152,7 @@ namespace WindowsManager.ViewModels
             #region Explorer
 
             AddHotKey(new HotKey(
+                _IdGen.Next(),
                 "Explorer",
                 GetExplorerWindow,
                 Key.E,

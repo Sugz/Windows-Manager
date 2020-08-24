@@ -17,6 +17,8 @@ namespace WindowsManager.ViewModels
         private readonly WeakFunc<bool> _CanExecute;
 
 
+        public int Id { get; private set; }
+
 
         public bool IsEnable
         {
@@ -121,8 +123,8 @@ namespace WindowsManager.ViewModels
         /// parameter to true if the action is causing a closure. See
         /// http://galasoft.ch/s/mvvmweakaction. </param>
         /// <exception cref="ArgumentNullException">If the execute argument is null.</exception>
-        public HotKey(string name, Action execute, Key key, ModifierKeys modifiers = ModifierKeys.None, string description = null, bool keepTargetAlive = false)
-            : this(name, execute, null, key, modifiers, description, keepTargetAlive)
+        public HotKey(int id, string name, Action execute, Key key, ModifierKeys modifiers = ModifierKeys.None, string description = null, bool keepTargetAlive = false)
+            : this(id, name, execute, null, key, modifiers, description, keepTargetAlive)
         {
         }
 
@@ -138,8 +140,9 @@ namespace WindowsManager.ViewModels
         /// parameter to true if the action is causing a closures. See
         /// http://galasoft.ch/s/mvvmweakaction. </param>
         /// <exception cref="ArgumentNullException">If the execute argument is null.</exception>
-        public HotKey(string name, Action execute, Func<bool> canExecute, Key key, ModifierKeys modifiers = ModifierKeys.None, string description = null, bool keepTargetAlive = false)
+        public HotKey(int id, string name, Action execute, Func<bool> canExecute, Key key, ModifierKeys modifiers = ModifierKeys.None, string description = null, bool keepTargetAlive = false)
         {
+            Id = id;
             _Name = name ?? throw new ArgumentNullException(nameof(name));
             _Description = description;
 

@@ -1,6 +1,7 @@
 ﻿using GalaSoft.MvvmLight;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -24,7 +25,7 @@ namespace WindowsManager.ViewModels
 
         #region Properties
 
-        public Dictionary<int, HotKey> HotKeys { get; set; } = new Dictionary<int, HotKey>(); 
+        public ObservableCollection<HotKey> HotKeys { get; set; } = new ObservableCollection<HotKey>();
 
         #endregion Properties
 
@@ -34,11 +35,11 @@ namespace WindowsManager.ViewModels
         private void InitializeHotKeysHost()
         {
             _WndProcWindow = new WndProcWindow();
-            _WndProcWindow.WndProcCalled += GetHotKey;
+            _WndProcWindow.WndProcCalled += GetHotKeyMessage;
         }
 
 
-        private void GetHotKey(object sender, Forms.Message message)
+        private void GetHotKeyMessage(object sender, Forms.Message message)
         {
             // Only interested in hotkey messages so skip others
             if (message.Msg != NativeMethods.WM_HOTKEY)
@@ -46,8 +47,8 @@ namespace WindowsManager.ViewModels
 
             // Get hotkey id and execute it
             int id = message.WParam.ToInt32();
-            if (HotKeys.ContainsKey(id))
-                HotKeys[id].Execute();
+            if (HotKeys.FirstOrDefault(x => x.Id == id) is HotKey hotKey)
+                hotKey.Execute();
         }
 
         #endregion Initialization
@@ -55,9 +56,9 @@ namespace WindowsManager.ViewModels
 
         #region Win Global HotKey Interop
 
-        private void RegisterHotKey(int id, HotKey hotKey)
+        private void RegisterHotKey(HotKey hotKey)
         {
-            NativeMethods.RegisterHotKey(_WndProcWindow.Handle, id, (int)hotKey.Modifiers, KeyInterop.VirtualKeyFromKey(hotKey.Key));
+            NativeMethods.RegisterHotKey(_WndProcWindow.Handle, hotKey.Id, (int)hotKey.Modifiers, KeyInterop.VirtualKeyFromKey(hotKey.Key));
             int error = Marshal.GetLastWin32Error();
             if (error != 0)
             {
@@ -70,9 +71,9 @@ namespace WindowsManager.ViewModels
             }
         }
 
-        private void UnregisterHotKey(int id)
+        private void UnregisterHotKey(HotKey hotKey)
         {
-            NativeMethods.UnregisterHotKey(_WndProcWindow.Handle, id);
+            NativeMethods.UnregisterHotKey(_WndProcWindow.Handle, hotKey.Id);
             int error = Marshal.GetLastWin32Error();
             if (error != 0)
                 throw new Win32Exception(error);
@@ -85,22 +86,21 @@ namespace WindowsManager.ViewModels
 
         private void OnHotkeyPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            var kvPair = HotKeys.FirstOrDefault(h => h.Value == sender);
-            if (kvPair.Value != null)
+            if (HotKeys.FirstOrDefault(x => x.Equals(sender)) is HotKey hotKey)
             {
                 if (e.PropertyName == "IsEnable")
                 {
-                    if (kvPair.Value.IsEnable)
-                        RegisterHotKey(kvPair.Key, kvPair.Value);
+                    if (hotKey.IsEnable)
+                        RegisterHotKey(hotKey);
                     else
-                        UnregisterHotKey(kvPair.Key);
+                        UnregisterHotKey(hotKey);
                 }
                 else if (e.PropertyName == "Key" || e.PropertyName == "Modifiers")
                 {
-                    if (kvPair.Value.IsEnable)
+                    if (hotKey.IsEnable)
                     {
-                        UnregisterHotKey(kvPair.Key);
-                        RegisterHotKey(kvPair.Key, kvPair.Value);
+                        UnregisterHotKey(hotKey);
+                        RegisterHotKey(hotKey);
                     }
                 }
             }
@@ -114,18 +114,17 @@ namespace WindowsManager.ViewModels
         public void AddHotKey(HotKey hotKey)
         {
             if (hotKey == null)
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(hotKey));
             if (hotKey.Key == 0)
-                throw new ArgumentNullException("value.Key");
-            if (HotKeys.Values.Any(x => x.Equals(hotKey)))
+                throw new ArgumentNullException("hotKey.Key");
+            if (HotKeys.Any(x => x.Equals(hotKey)))
                 throw new HotKeyAlreadyRegisteredException("HotKey already registered!", hotKey);
 
-            int id = _IdGen.Next();
             if (hotKey.IsEnable)
-                RegisterHotKey(id, hotKey);
+                RegisterHotKey(hotKey);
 
             hotKey.PropertyChanged += OnHotkeyPropertyChanged;
-            HotKeys[id] = hotKey;
+            HotKeys.Add(hotKey);
         }
 
 
@@ -136,15 +135,16 @@ namespace WindowsManager.ViewModels
         /// <returns>True if success, otherwise false</returns>
         public bool RemoveHotKey(HotKey hotKey)
         {
-            var kvPair = HotKeys.FirstOrDefault(h => h.Value == hotKey);
-            if (kvPair.Value != null)
+            HotKey _hotKey = HotKeys.FirstOrDefault(h => h.Equals(hotKey));
+            if (_hotKey != null)
             {
-                kvPair.Value.PropertyChanged -= OnHotkeyPropertyChanged;
-                if (kvPair.Value.IsEnable)
-                    UnregisterHotKey(kvPair.Key);
+                _hotKey.PropertyChanged -= OnHotkeyPropertyChanged;
+                if (_hotKey.IsEnable)
+                    UnregisterHotKey(_hotKey);
 
-                return HotKeys.Remove(kvPair.Key);
+                return HotKeys.Remove(_hotKey);
             }
+
             return false;
         }
 
@@ -155,9 +155,9 @@ namespace WindowsManager.ViewModels
 
         private void CleanupHotKeysHost()
         {
-            _WndProcWindow.WndProcCalled -= GetHotKey;
+            _WndProcWindow.WndProcCalled -= GetHotKeyMessage;
             for (int i = HotKeys.Count() - 1; i >= 0; i--)
-                RemoveHotKey(HotKeys.Values.ElementAt(i));
+                RemoveHotKey(HotKeys.ElementAt(i));
 
             _WndProcWindow.ReleaseHandle();
             _WndProcWindow.DestroyHandle();
