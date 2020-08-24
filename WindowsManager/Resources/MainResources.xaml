@@ -7,7 +7,8 @@
 
     <ContextMenu x:Key="TaskbarContextMenu" x:Shared="false">
         <MenuItem Header="Show screens splitters" Command="{Binding ShowSplitWindowsCommand}"/>
-        <MenuItem Header="Show HotKeys" Command="{Binding ShowHotKeysWindowsCommand}"/>
+        <Separator />
+        <MenuItem Header="Options" Command="{Binding ShowOptionsWindowsCommand}"/>
         <Separator />
         <MenuItem Header="Exit" Command="{Binding ExitAppCommand}"/>
     </ContextMenu>

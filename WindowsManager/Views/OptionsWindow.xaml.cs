@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,11 +16,18 @@ namespace WindowsManager.Views
     /// <summary>
     /// Interaction logic for HotKeysWindow.xaml
     /// </summary>
-    public partial class HotKeysWindow : Window
+    public partial class OptionsWindow : Window
     {
-        public HotKeysWindow()
+        public OptionsWindow()
         {
             InitializeComponent();
+        }
+
+       
+        private void OnNumericUpDownKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                ExplorerSize.Focus();
         }
     }
 }

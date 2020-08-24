@@ -18,7 +18,7 @@ namespace WindowsManager.ViewModels
 
         #region Fields
 
-        private HotKeysWindow _HotKeysWindow;
+        private OptionsWindow _HotKeysWindow;
         private SettingsManager _SettingsManager;
         private bool _SettingsExist;
         private ForegroundWindowHook _ForegroundWindowHook;
@@ -37,7 +37,7 @@ namespace WindowsManager.ViewModels
         #region Commands
 
         private RelayCommand _ShowSplitWindowsCommand;
-        private RelayCommand _ShowHotKeysWindowsCommand;
+        private RelayCommand _ShowOptionsWindowsCommand;
         private RelayCommand _ExitAppCommand;
 
         public RelayCommand ShowSplitWindowsCommand => _ShowSplitWindowsCommand ??= new RelayCommand
@@ -45,11 +45,11 @@ namespace WindowsManager.ViewModels
             () => Screens.ForEach(x => x.ShowSplitters())
         );
 
-        public RelayCommand ShowHotKeysWindowsCommand => _ShowHotKeysWindowsCommand ??= new RelayCommand
+        public RelayCommand ShowOptionsWindowsCommand => _ShowOptionsWindowsCommand ??= new RelayCommand
         (
             () =>
             {
-                _HotKeysWindow ??= new HotKeysWindow();
+                _HotKeysWindow ??= new OptionsWindow();
                 _HotKeysWindow.Show();
             }
         );
