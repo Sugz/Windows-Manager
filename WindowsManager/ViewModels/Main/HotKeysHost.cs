@@ -16,7 +16,7 @@ namespace WindowsManager.ViewModels
 
         #region Fields
 
-        private static readonly SerialCounter _IdGen = new SerialCounter(1);
+        private static readonly SerialCounter _IdGen = new SerialCounter(0);
         private WndProcWindow _WndProcWindow;
 
         #endregion Fields
@@ -156,10 +156,11 @@ namespace WindowsManager.ViewModels
         private void CleanupHotKeysHost()
         {
             _WndProcWindow.WndProcCalled -= GetHotKey;
-            _WndProcWindow.ReleaseHandle();
-            _WndProcWindow.DestroyHandle();
             for (int i = HotKeys.Count() - 1; i >= 0; i--)
                 RemoveHotKey(HotKeys.Values.ElementAt(i));
+
+            _WndProcWindow.ReleaseHandle();
+            _WndProcWindow.DestroyHandle();
         }
 
         #endregion Cleanup
