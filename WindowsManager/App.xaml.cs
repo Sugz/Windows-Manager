@@ -1,11 +1,6 @@
 ﻿using Hardcodet.Wpf.TaskbarNotification;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
+using WindowsManager.ViewModels;
 
 namespace WindowsManager
 {
@@ -26,6 +21,7 @@ namespace WindowsManager
         protected override void OnExit(ExitEventArgs e)
         {
             _TaskbarIcon.Dispose();
+            ViewModelLocator.Cleanup();
             base.OnExit(e);
         }
     }
