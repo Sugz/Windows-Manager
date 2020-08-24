@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Xml.Linq;
-using GalaSoft.MvvmLight;
+﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using GalaSoft.MvvmLight.Ioc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+using System.Xml.Linq;
 using WindowsManager.Helpers;
 using Forms = System.Windows.Forms;
 
 namespace WindowsManager.ViewModels
 {
-    public class MainViewModel : ViewModelBase
+    public partial class MainViewModel : ViewModelBase
     {
 
         #region Fields
@@ -52,6 +50,7 @@ namespace WindowsManager.ViewModels
         {
             CheckSettings();
             GetScreens();
+            InitializeHotKeysHost();
         }
 
         #endregion Constructor
@@ -119,9 +118,20 @@ namespace WindowsManager.ViewModels
                 _SettingsManager = SimpleIoc.Default.GetInstance<SettingsManager>();
 
             _SettingsManager.Save(serializedScreens);
-        } 
+        }
 
         #endregion Event Handlers
+
+
+        #region Cleanup
+
+        public override void Cleanup()
+        {
+            CleanupHotKeysHost();
+            base.Cleanup();
+        }
+
+        #endregion Cleanup
 
     }
 }
