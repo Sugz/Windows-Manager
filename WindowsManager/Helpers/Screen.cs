@@ -28,6 +28,8 @@ namespace WindowsManager.Helpers
 
         public Rect WorkingArea { get; private set; }
 
+        public Rect Bounds { get; private set; }
+
         public int Index { get; private set; }
 
         public Rect[] Rects { get; private set; } = new Rect[3];
@@ -51,6 +53,7 @@ namespace WindowsManager.Helpers
             _Screen = screen;
             Index = index;
             WorkingArea = new Rect(_Screen.WorkingArea.X, _Screen.WorkingArea.Y, _Screen.WorkingArea.Width, _Screen.WorkingArea.Height);
+            Bounds = new Rect(_Screen.Bounds.X, _Screen.Bounds.Y, _Screen.Bounds.Width, _Screen.Bounds.Height);
             Orientation = WorkingArea.Width >= WorkingArea.Height ? Orientation.Horizontal : Orientation.Vertical;
 
             if (!settingsExist)

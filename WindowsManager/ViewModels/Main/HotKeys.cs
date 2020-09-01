@@ -196,7 +196,7 @@ namespace WindowsManager.ViewModels
                     _IdGen.Next(),
                     $"Switch to {numbers[index]} monitor",
                     () => SwitchToScreen(index),
-                    () => _CurrentForegroundWindow != IntPtr.Zero,
+                    IsValidForegroundWindow,
                     (Key)75 + index,
                     ModifierKeys.Control,
                     $"Switch the current window to the {numbers[index]} monitor center area"
@@ -211,7 +211,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 "Maximize Window",
                 () => SwitchToArea(),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.Enter,
                 ModifierKeys.Control,
                 "Maximize the current window in the nearest area"
@@ -225,7 +225,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 "Switch to Previous Area",
                 () => SwitchToArea(-1),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.PageDown,
                 ModifierKeys.Control,
                 "Switch the current window to the previous area"
@@ -235,7 +235,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 "Switch to Next Area",
                 () => SwitchToArea(1),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.PageUp,
                 ModifierKeys.Control,
                 "Switch the current window to the next area"
@@ -249,7 +249,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 $"Extend Window to previous area",
                 () => ExtendToArea(-1),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.PageDown,
                 ModifierKeys.Control | ModifierKeys.Alt,
                 $"Extend the current window using the current and previous area"
@@ -259,7 +259,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 $"Extend Window to next area",
                 () => ExtendToArea(1),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.PageUp,
                 ModifierKeys.Control | ModifierKeys.Alt,
                 $"Extend the current window using the current and next area"
@@ -273,7 +273,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 $"Move Window Left",
                 () => MoveWindow(Side.Left),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.Left,
                 ModifierKeys.Control,
                 $"Move left the current window"
@@ -283,7 +283,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 $"Move Window Up",
                 () => MoveWindow(Side.Up),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.Up,
                 ModifierKeys.Control,
                 $"Move up the current window"
@@ -293,7 +293,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 $"Move Window Right",
                 () => MoveWindow(Side.Right),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.Right,
                 ModifierKeys.Control,
                 $"Move right the current window"
@@ -303,7 +303,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 $"Move Window Down",
                 () => MoveWindow(Side.Down),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.Down,
                 ModifierKeys.Control,
                 $"Move down the current window"
@@ -317,7 +317,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 $"Positive Resize Window Left",
                 () => ResizeWindow(Side.Left, 1),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.Left,
                 ModifierKeys.Control | ModifierKeys.Shift,
                 $"Positive Resize left the current window"
@@ -327,7 +327,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 $"Positive Resize Window Up",
                 () => ResizeWindow(Side.Up, 1),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.Up,
                 ModifierKeys.Control | ModifierKeys.Shift,
                 $"Positive Resize up the current window"
@@ -337,7 +337,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 $"Positive Resize Window Right",
                 () => ResizeWindow(Side.Right, 1),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.Right,
                 ModifierKeys.Control | ModifierKeys.Shift,
                 $"Positive Resize right the current window"
@@ -347,7 +347,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 $"Positive Resize Window Down",
                 () => ResizeWindow(Side.Down, 1),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.Down,
                 ModifierKeys.Control | ModifierKeys.Shift,
                 $"Positive Resize down the current window"
@@ -361,7 +361,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 $"Positive Resize Window Left",
                 () => ResizeWindow(Side.Left, -1),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.Left,
                 ModifierKeys.Control | ModifierKeys.Alt,
                 $"Positive Resize left the current window"
@@ -371,7 +371,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 $"Positive Resize Window Up",
                 () => ResizeWindow(Side.Up, -1),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.Up,
                 ModifierKeys.Control | ModifierKeys.Alt,
                 $"Positive Resize up the current window"
@@ -381,7 +381,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 $"Positive Resize Window Right",
                 () => ResizeWindow(Side.Right, -1),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.Right,
                 ModifierKeys.Control | ModifierKeys.Alt,
                 $"Positive Resize right the current window"
@@ -391,7 +391,7 @@ namespace WindowsManager.ViewModels
                 _IdGen.Next(),
                 $"Positive Resize Window Down",
                 () => ResizeWindow(Side.Down, -1),
-                () => _CurrentForegroundWindow != IntPtr.Zero,
+                IsValidForegroundWindow,
                 Key.Down,
                 ModifierKeys.Control | ModifierKeys.Alt,
                 $"Positive Resize down the current window"
@@ -411,7 +411,6 @@ namespace WindowsManager.ViewModels
                 ));
 
             #endregion Explorer
-
 
             #region Screen Capture
 
@@ -433,8 +432,40 @@ namespace WindowsManager.ViewModels
 
         #region Methods and Handlers
 
+
+        /// <summary>
+        /// Check if the foreground window is valid (aka not fullscreen or desktop)
+        /// </summary>
+        /// <returns></returns>
+        public bool IsValidForegroundWindow()
+        {
+            // go through simple test first
+            if (_CurrentForegroundWindow != IntPtr.Zero &&
+                !NativeMethods.IsDesktopWindow(_CurrentForegroundWindow) &&
+                NativeMethods.GetWindowPlacement(_CurrentForegroundWindow) != NativeMethods.ShowWindowCommands.Maximized)
+            {
+                // some windows return a wrong rect, so we use CloseEnough to determine if the window is fullscreen
+                NativeMethods.GetWindowRect(_CurrentForegroundWindow, out NativeMethods.RECT windowRect);
+                Rect rect = windowRect.ToRect();
+                ContainingRects rects = GetContainingRects(rect);
+                Screen screen = Screens[rects.Screen];
+
+                return !(screen.WorkingArea.CloseEnough(rect) || screen.Bounds.CloseEnough(rect));
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
+        /// Get a window Rect and invisible borders
+        /// </summary>
+        /// <returns></returns>
         private WindowRect GetWindowSize()
         {
+            //GetWindowRect doesn't always return the correct RECT
+            //DwmGetWindowAttribute can sometimes give an indication wheter the window have invisible borders
+
             NativeMethods.GetWindowRect(_CurrentForegroundWindow, out NativeMethods.RECT windowRect);
 
             if (Environment.OSVersion.Version.Major < 6)
@@ -453,6 +484,11 @@ namespace WindowsManager.ViewModels
         }
 
 
+        /// <summary>
+        /// Get which screen and screen area contain a given rect
+        /// </summary>
+        /// <param name="wndRect"></param>
+        /// <returns></returns>
         private ContainingRects GetContainingRects(Rect wndRect)
         {
             List<Rect> screensRect = Screens.Select(x => x.WorkingArea).ToList();

@@ -107,21 +107,6 @@ namespace WindowsManager.ViewModels
                     Screens[index].Rects[i] = new Rect(rectValues[0], rectValues[1], rectValues[2], rectValues[3]);
                 }
             }
-
-            //if (_SettingsManager.Screens is IEnumerable<XElement> screenXElements)
-            //{
-            //    foreach (XElement screenXElement in screenXElements)
-            //    {
-            //        int index = int.Parse(screenXElement.Attribute("Index").Value);
-
-            //        List<XElement> rectXElements = screenXElement.Elements().ToList();
-            //        for (int i = 0; i < rectXElements.Count; i++)
-            //        {
-            //            List<double> rectValues = rectXElements[i].Value.Split(',').Select(x => double.Parse(x)).ToList();
-            //            Screens[index].Rects[i] = new Rect(rectValues[0], rectValues[1], rectValues[2], rectValues[3]);
-            //        }
-            //    }
-            //}
         }
 
 

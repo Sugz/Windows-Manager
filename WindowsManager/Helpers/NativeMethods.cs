@@ -135,6 +135,15 @@ namespace WindowsManager.Helpers
             ForceMinimized = 11
         }
 
+
+        internal enum ShowWindowCommands : int
+        {
+            Hide = 0,
+            Normal = 1,
+            Minimized = 2,
+            Maximized = 3,
+        }
+
         #endregion Enums
 
 
@@ -158,6 +167,18 @@ namespace WindowsManager.Helpers
             }
         }
 
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct WINDOWPLACEMENT
+        {
+            public int length;
+            public int flags;
+            public ShowWindowCommands showCmd;
+            public System.Drawing.Point ptMinPosition;
+            public System.Drawing.Point ptMaxPosition;
+            public System.Drawing.Rectangle rcNormalPosition;
+        }
+
         #endregion Structs
 
 
@@ -172,6 +193,29 @@ namespace WindowsManager.Helpers
                 return Buff.ToString();
 
             return null;
+        }
+
+        internal static bool IsDesktopWindow(IntPtr handle)
+        {
+            const int maxChars = 256;
+            StringBuilder className = new StringBuilder(maxChars);
+
+            if (GetClassName(handle, className, maxChars) > 0)
+            {
+                string cName = className.ToString();
+                return cName == "Progman" || cName == "WorkerW";
+            }
+
+            return false;
+        }
+
+
+        internal static ShowWindowCommands GetWindowPlacement(IntPtr hwnd)
+        {
+            WINDOWPLACEMENT placement = new WINDOWPLACEMENT();
+            placement.length = Marshal.SizeOf(placement);
+            GetWindowPlacement(hwnd, ref placement);
+            return placement.showCmd;
         }
 
 
@@ -204,7 +248,14 @@ namespace WindowsManager.Helpers
         internal static extern int DwmGetWindowAttribute(IntPtr hwnd, DwmWindowAttribute dwAttribute, out RECT pvAttribute, int cbAttribute);
 
         [DllImport("user32.dll")]
-        internal static extern bool ShowWindow(IntPtr hWnd, WindowShowStyle nCmdShow); 
+        internal static extern bool ShowWindow(IntPtr hWnd, WindowShowStyle nCmdShow);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        internal static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
 
         #endregion Win32 API
 

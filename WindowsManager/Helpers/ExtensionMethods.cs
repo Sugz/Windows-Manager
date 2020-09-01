@@ -37,5 +37,14 @@ namespace WindowsManager.Helpers
             return rect;
         }
 
+
+        internal static bool CloseEnough(this Rect a, Rect b, int delta = 10)
+        {
+            return (Math.Abs(a.X - b.X) <= delta &&
+                Math.Abs(a.Y - b.Y) <= delta &&
+                Math.Abs(a.Width - b.Width) <= delta * 2 &&
+                Math.Abs(a.Height - b.Height) <= delta * 2);
+        }
+
     }
 }
