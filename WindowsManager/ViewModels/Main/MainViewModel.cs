@@ -4,6 +4,7 @@ using GalaSoft.MvvmLight.Ioc;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Windows;
 using System.Xml.Linq;
@@ -20,16 +21,17 @@ namespace WindowsManager.ViewModels
 
         private OptionsWindow _HotKeysWindow;
         private SettingsManager _SettingsManager;
-        private bool _SettingsExist;
+        private bool _SettingsExist = false;
         private ForegroundWindowHook _ForegroundWindowHook;
         private IntPtr _CurrentForegroundWindow = IntPtr.Zero;
+        private Rectangle _ScreensBounds;
 
         #endregion Fields
 
 
         #region Properties
 
-        public List<Screen> Screens { get; private set; } = new List<Screen>(); 
+        public List<Screen> Screens { get; private set; } = new List<Screen>();
 
         #endregion Properties
 
@@ -54,6 +56,7 @@ namespace WindowsManager.ViewModels
             }
         );
 
+
         public RelayCommand ExitAppCommand => _ExitAppCommand ??= new RelayCommand(() => Application.Current.Shutdown());
 
         #endregion Commands
@@ -67,6 +70,7 @@ namespace WindowsManager.ViewModels
             GetScreens();
             SetForegroundWindowHook();
             InitializeHotKeysHost();
+            LoadHotKeysSettings();
             CreateHotKeys();
         }
 
@@ -80,41 +84,64 @@ namespace WindowsManager.ViewModels
             if (_SettingsManager is null)
                 _SettingsManager = SimpleIoc.Default.GetInstance<SettingsManager>();
 
-            _SettingsExist = _SettingsManager.SettingsExist();
+            _SettingsExist = _SettingsManager.SettingsExist;
+
+            if (_SettingsManager.SettingsExist)
+            {
+                _SettingsManager.Load();
+                _SettingsExist = true;
+            }
         }
 
 
-        private void LoadSettings()
+        private void LoadScreensSettings()
         {
-            if (_SettingsManager.Load() is IEnumerable<XElement> screenXElements)
+            foreach (XElement screenXElement in _SettingsManager.Screens)
             {
-                foreach (XElement screenXElement in screenXElements)
-                {
-                    int index = int.Parse(screenXElement.Attribute("Index").Value);
+                int index = int.Parse(screenXElement.Attribute("Index").Value);
 
-                    List<XElement> rectXElements = screenXElement.Elements().ToList();
-                    for (int i = 0; i < rectXElements.Count; i++)
-                    {
-                        List<double> rectValues = rectXElements[i].Value.Split(',').Select(x => double.Parse(x)).ToList();
-                        Screens[index].Rects[i] = new Rect(rectValues[0], rectValues[1], rectValues[2], rectValues[3]);
-                    }
+                List<XElement> rectXElements = screenXElement.Elements().ToList();
+                for (int i = 0; i < rectXElements.Count; i++)
+                {
+                    List<double> rectValues = rectXElements[i].Value.Split(',').Select(x => double.Parse(x)).ToList();
+                    Screens[index].Rects[i] = new Rect(rectValues[0], rectValues[1], rectValues[2], rectValues[3]);
                 }
             }
+
+            //if (_SettingsManager.Screens is IEnumerable<XElement> screenXElements)
+            //{
+            //    foreach (XElement screenXElement in screenXElements)
+            //    {
+            //        int index = int.Parse(screenXElement.Attribute("Index").Value);
+
+            //        List<XElement> rectXElements = screenXElement.Elements().ToList();
+            //        for (int i = 0; i < rectXElements.Count; i++)
+            //        {
+            //            List<double> rectValues = rectXElements[i].Value.Split(',').Select(x => double.Parse(x)).ToList();
+            //            Screens[index].Rects[i] = new Rect(rectValues[0], rectValues[1], rectValues[2], rectValues[3]);
+            //        }
+            //    }
+            //}
         }
 
 
         private void GetScreens()
         {
+            Rectangle screensBounds = new Rectangle();
             Forms.Screen[] allScreens = Forms.Screen.AllScreens;
             for (int i = 0; i < allScreens.Length; i++)
             {
                 Screen screen = new Screen(allScreens[i], i, _SettingsExist);
+                screensBounds = Rectangle.Union(screensBounds, allScreens[i].Bounds);
                 screen.SplitWindowHide += HideSplitters;
                 Screens.Add(screen);
             }
 
+            _ScreensBounds = screensBounds;
+
             if (_SettingsExist)
-                LoadSettings();
+                LoadScreensSettings();
+
         }
 
 
@@ -145,7 +172,7 @@ namespace WindowsManager.ViewModels
             if (_SettingsManager is null)
                 _SettingsManager = SimpleIoc.Default.GetInstance<SettingsManager>();
 
-            _SettingsManager.Save(serializedScreens);
+            _SettingsManager.Screens = serializedScreens;
         }
 
         private void OnForegroundWindowChanged(object sender, ForegroundWindowChangedEventArgs e)

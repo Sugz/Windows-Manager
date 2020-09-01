@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using Imaging = System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -11,6 +12,8 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using WindowsManager.Helpers;
 
 namespace WindowsManager.ViewModels
@@ -74,9 +77,13 @@ namespace WindowsManager.ViewModels
 
         #region Fields
 
-        private int _MoveStep = 25;
-        private int _ResizeStep = 25;
-        private Helpers.Size _ExplorerSize = new Helpers.Size(1400, 800);
+        private bool _IsLoadingSettings = false;
+        private int _MoveStep;
+        private int _ResizeStep;
+        private int _ExplorerWidth;
+        private int _ExplorerHeight;
+        private string _ImageViewerPath;
+
 
         #endregion Fields
 
@@ -86,24 +93,94 @@ namespace WindowsManager.ViewModels
         public int MoveStep
         {
             get => _MoveStep;
-            set => Set(ref _MoveStep, value);
+            set
+            {
+                Set(ref _MoveStep, value);
+
+                if (!_IsLoadingSettings)
+                    _SettingsManager.MoveStep = _MoveStep;
+            }
         }
         public int ResizeStep
         {
             get => _ResizeStep;
-            set => Set(ref _ResizeStep, value);
+            set
+            {
+                Set(ref _ResizeStep, value);
+
+                if (!_IsLoadingSettings)
+                    _SettingsManager.ResizeStep = _ResizeStep;
+            }
         }
 
-        public Helpers.Size ExplorerSize
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int ExplorerWidth
         {
-            get => _ExplorerSize;
-            set => Set(ref _ExplorerSize, value);
+            get => _ExplorerWidth;
+            set
+            {
+                Set(ref _ExplorerWidth, value);
+
+                if (!_IsLoadingSettings)
+                    _SettingsManager.ExplorerWidth = _ExplorerWidth;
+            }
         }
+
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public int ExplorerHeight
+        {
+            get => _ExplorerHeight;
+            set
+            {
+                Set(ref _ExplorerHeight, value);
+
+                if (!_IsLoadingSettings)
+                    _SettingsManager.ExplorerHeight = _ExplorerHeight;
+            }
+        }
+
+
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string ImageViewerPath
+        {
+            get => _ImageViewerPath;
+            set
+            {
+                Set(ref _ImageViewerPath, value);
+
+                if (!_IsLoadingSettings)
+                    _SettingsManager.ImageViewerPath = _ImageViewerPath;
+            }
+        }
+
 
         #endregion Properties
 
 
-        #region HotKeys
+        #region Initialisation
+
+        private void LoadHotKeysSettings()
+        {
+            _IsLoadingSettings = true;
+
+            MoveStep = _SettingsManager.MoveStep;
+            ResizeStep = _SettingsManager.ResizeStep;
+            ExplorerWidth = _SettingsManager.ExplorerWidth;
+            ExplorerHeight = _SettingsManager.ExplorerHeight;
+            ImageViewerPath = _SettingsManager.ImageViewerPath;
+
+            _IsLoadingSettings = false;
+        }
 
         private void CreateHotKeys()
         {
@@ -335,9 +412,23 @@ namespace WindowsManager.ViewModels
 
             #endregion Explorer
 
+
+            #region Screen Capture
+
+            AddHotKey(new HotKey(
+                _IdGen.Next(),
+                "Explorer",
+                CaptureScreen,
+                Key.PrintScreen,
+                ModifierKeys.None,
+                "Set the Explorer window to the center of the screen"
+                ));
+
+            #endregion Screen Capture
+
         }
 
-        #endregion HotKeys
+        #endregion Initialisation
 
 
         #region Methods and Handlers
@@ -557,7 +648,7 @@ namespace WindowsManager.ViewModels
                 if (filename.Equals("explorer"))
                 {
                     IntPtr explorerHwnd = new IntPtr(ie.HWND);
-                    SetWindowInFront(explorerHwnd, ExplorerSize);
+                    SetWindowInFront(explorerHwnd, ExplorerWidth, ExplorerHeight);
                     return;
                 }
             }
@@ -566,7 +657,7 @@ namespace WindowsManager.ViewModels
         }
 
 
-        private void SetWindowInFront(IntPtr hwnd, Helpers.Size size)
+        private void SetWindowInFront(IntPtr hwnd, int? width = null, int? height = null)
         {
             //get the window size, then move it to the center of the first screen
             if (!NativeMethods.GetWindowRect(hwnd, out NativeMethods.RECT rct))
@@ -576,16 +667,18 @@ namespace WindowsManager.ViewModels
             int left, top;
 
             NativeMethods.SetWindowPosFlags flags = NativeMethods.SetWindowPosFlags.IgnoreZOrder | NativeMethods.SetWindowPosFlags.ShowWindow;
-            if (size.IsNull)
+            if (width is null || height is null)
             {
                 flags |= NativeMethods.SetWindowPosFlags.IgnoreResize;
                 left = (int)((Screens[0].WorkingArea.Width / 2) - (rect.Width / 2));
                 top = (int)((Screens[0].WorkingArea.Height / 2) - (rect.Height / 2));
+                width = 0;
+                height = 0;
             }
             else
             {
-                left = (int)((Screens[0].WorkingArea.Width / 2) - (size.Width / 2));
-                top = (int)((Screens[0].WorkingArea.Height / 2) - (size.Height / 2));
+                left = (int)((Screens[0].WorkingArea.Width / 2) - (width / 2));
+                top = (int)((Screens[0].WorkingArea.Height / 2) - (height / 2));
             }
 
 
@@ -596,14 +689,65 @@ namespace WindowsManager.ViewModels
                 NativeMethods.HWND_TOPMOST,
                 left,
                 top,
-                size.Width,
-                size.Height,
+                width.Value,
+                height.Value,
                 Convert.ToUInt32(flags));
 
             NativeMethods.SetForegroundWindow(hwnd);
-        } 
+        }
 
         #endregion Methods and Handlers
+
+
+        #region Screen Capture
+
+        private BitmapSource CreateBitmapSourceFromGdiBitmap(Bitmap bitmap)
+        {
+            if (bitmap == null)
+                throw new ArgumentNullException("bitmap");
+
+            var rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+
+            var bitmapData = bitmap.LockBits(
+                rect,
+                Imaging.ImageLockMode.ReadWrite,
+                Imaging.PixelFormat.Format32bppArgb);
+
+            try
+            {
+                var size = (rect.Width * rect.Height) * 4;
+
+                return BitmapSource.Create(
+                    bitmap.Width,
+                    bitmap.Height,
+                    bitmap.HorizontalResolution,
+                    bitmap.VerticalResolution,
+                    PixelFormats.Bgra32,
+                    null,
+                    bitmapData.Scan0,
+                    size,
+                    bitmapData.Stride);
+            }
+            finally
+            {
+                bitmap.UnlockBits(bitmapData);
+            }
+        }
+
+
+        private void CaptureScreen()
+        {
+            Bitmap bmp = new Bitmap(_ScreensBounds.Width, _ScreensBounds.Height, Imaging.PixelFormat.Format32bppArgb);
+
+            using Graphics graphics = Graphics.FromImage(bmp);
+            graphics.CopyFromScreen(_ScreensBounds.Location, System.Drawing.Point.Empty, bmp.Size);
+            Clipboard.SetImage(CreateBitmapSourceFromGdiBitmap(bmp));
+
+            if (_ImageViewerPath != null)
+                Process.Start(_ImageViewerPath, "-sc -bg");
+        } 
+
+        #endregion Screen Capture
     }
 }
 
