@@ -1,6 +1,7 @@
 ﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using GalaSoft.MvvmLight.Ioc;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,6 +26,7 @@ namespace WindowsManager.ViewModels
         private ForegroundWindowHook _ForegroundWindowHook;
         private IntPtr _CurrentForegroundWindow = IntPtr.Zero;
         private Rectangle _ScreensBounds;
+        private bool _StartWithWindow;
 
         #endregion Fields
 
@@ -32,6 +34,27 @@ namespace WindowsManager.ViewModels
         #region Properties
 
         public List<Screen> Screens { get; private set; } = new List<Screen>();
+
+
+        /// <summary>
+        /// Gets or sets wheter the app start with window or not.
+        /// </summary>
+        public bool StartWithWindow
+        {
+            get => _StartWithWindow;
+            set
+            {
+                Set(ref _StartWithWindow, value);
+
+                // The path to the key where Windows looks for startup applications
+                using RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                if (_StartWithWindow)
+                    key.SetValue(Constants.Product, Process.GetCurrentProcess().MainModule.FileName);
+                else
+                    key.DeleteValue(Constants.Product, false);
+
+            }
+        }
 
         #endregion Properties
 
@@ -59,6 +82,7 @@ namespace WindowsManager.ViewModels
 
         public RelayCommand ExitAppCommand => _ExitAppCommand ??= new RelayCommand(() => Application.Current.Shutdown());
 
+
         #endregion Commands
 
 
@@ -81,13 +105,18 @@ namespace WindowsManager.ViewModels
 
         private void CheckSettings()
         {
+            // check if the app start with windows
+            using RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            StartWithWindow = key.GetValue(Constants.Product) != null;
+
+            // define settings manager
             if (_SettingsManager is null)
                 _SettingsManager = SimpleIoc.Default.GetInstance<SettingsManager>();
 
-            _SettingsExist = _SettingsManager.SettingsExist;
-
+            // load settings if any
             if (_SettingsManager.SettingsExist)
             {
+                _SettingsExist = true;
                 _SettingsManager.Load();
                 _SettingsExist = true;
             }

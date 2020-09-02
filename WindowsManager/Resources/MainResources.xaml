@@ -3,21 +3,28 @@
                     xmlns:tb="http://www.hardcodet.net/taskbar"
                     xmlns:vm="clr-namespace:WindowsManager.ViewModels">
 
-    <vm:ViewModelLocator x:Key="Locator"/>
+    <vm:ViewModelLocator x:Key="Locator" />
 
-    <ContextMenu x:Key="TaskbarContextMenu" x:Shared="false">
-        <MenuItem Header="Show screens splitters" Command="{Binding ShowSplitWindowsCommand}"/>
+    <ContextMenu x:Key="TaskbarContextMenu"
+                 x:Shared="false">
+        <MenuItem Command="{Binding ShowSplitWindowsCommand}"
+                  Header="Show screens splitters" />
         <Separator />
-        <MenuItem Header="Options" Command="{Binding ShowOptionsWindowsCommand}"/>
+        <MenuItem Command="{Binding ShowOptionsWindowsCommand}"
+                  Header="Options" />
+        <MenuItem Header="Start with Windows"
+                  IsCheckable="True"
+                  IsChecked="{Binding StartWithWindow}" />
         <Separator />
-        <MenuItem Header="Exit" Command="{Binding ExitAppCommand}"/>
+        <MenuItem Command="{Binding ExitAppCommand}"
+                  Header="Exit" />
     </ContextMenu>
 
 
     <tb:TaskbarIcon x:Key="TaskbarIcon"
-                    IconSource="/Resources/Icons/WindowsManager_Icon.ico"
-                    ToolTipText="Windows Manager"
+                    ContextMenu="{StaticResource TaskbarContextMenu}"
                     DataContext="{Binding Main, Source={StaticResource Locator}}"
-                    ContextMenu="{StaticResource TaskbarContextMenu}"/>
+                    IconSource="/Resources/Icons/WindowsManager_Icon.ico"
+                    ToolTipText="Windows Manager" />
 
 </ResourceDictionary>

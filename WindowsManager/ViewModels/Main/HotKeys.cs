@@ -784,8 +784,6 @@ namespace WindowsManager.ViewModels
         } 
 
         #endregion Screen Capture
+
     }
 }
-
-
-//TODO: save properties in settings
